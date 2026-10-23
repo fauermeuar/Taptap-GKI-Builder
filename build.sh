@@ -162,6 +162,13 @@ echo "   Kernel : $LINUX_VERSION ($k_lastcommit)"
 echo "   Variant: $VARIANT"
 
 make "${MAKE_ARGS[@]}" $KERNEL_DEFCONFIG
+
+# Runner GitHub RAM-nya terbatas: link LTO penuh (vmlinux.o) bisa kehabisan
+# memori sampai prosesnya "Killed". Pakai ThinLTO — jauh lebih ringan,
+# kernel yang dihasilkan setara untuk pemakaian ini.
+./scripts/config --file "$OUTDIR/.config" --disable LTO_CLANG_FULL --enable LTO_CLANG_THIN
+make "${MAKE_ARGS[@]}" olddefconfig
+
 make -j$(nproc --all) "${MAKE_ARGS[@]}"
 
 KERNEL_IMAGE="$OUTDIR/arch/arm64/boot/Image"
