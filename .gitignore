@@ -1,0 +1,9 @@
+out/
+ksrc/
+clang/
+clang_archive
+AnyKernel3/
+susfs/
+susfs4ksu/
+artifacts/
+*.zip
