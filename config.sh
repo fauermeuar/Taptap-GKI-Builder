@@ -6,11 +6,12 @@
 # ==========================================
 KERNEL_NAME="Taptap-GKI"
 KERNEL_SOURCE="https://github.com/zylhdrXP/android_kernel_common-5.10"
-KERNEL_BRANCH="android12-5.10"
-# Commit ini = "Merge 5.10.270 into android12-5.10-lts" (Makefile: 5.10.270).
-# Source TIDAK mengikuti ujung branch (yang sekarang sudah 5.10.272) —
-# build selalu berhenti tepat di commit ini.
-KERNEL_COMMIT="41a2213127d9b08076e88c1a70a23ac8f792ea4f"
+# Basis = branch utama zylhdrXP pada commit .269 — garis keturunan semua
+# kernel FleurX yang terbukti boot. Versi .270 dicapai dengan tambalan
+# (patches/stable-5.10.270.patch + overlay-270/), BUKAN dengan mengambil
+# jalur -lts Google polos — kernel dari jalur -lts terbukti tidak boot.
+KERNEL_BASE_COMMIT="82ea428432eb2b6266bf84cee1ac61a02c6d4bc2"
+KERNEL_TARBALL_URL="https://codeload.github.com/zylhdrXP/android_kernel_common-5.10/tar.gz/82ea428432eb2b6266bf84cee1ac61a02c6d4bc2"
 KERNEL_VERSION="5.10.270"
 BUILD_VERSION="1.0.0"
 KBUILD_USER="taptap"
