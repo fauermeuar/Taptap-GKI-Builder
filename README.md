@@ -11,20 +11,25 @@ Builder kernel GKI 5.10 punya TapTap — hasil adaptasi dari FleurX-GKI-Builder
 3. Hasil build diunduh dari **GitHub Actions Artifact** — tidak pakai
    GitHub Release, tidak pakai Telegram.
 
-## Versi 5.10.270 dipatok di mana
+## Versi 5.10.270 didapat dari mana
 
-Di `config.sh`:
+Basisnya **bukan** jalur -lts Google polos (kernel dari jalur itu terbukti
+tidak boot di fleur). Resepnya:
 
-- `KERNEL_COMMIT="41a2213127d9b08076e88c1a70a23ac8f792ea4f"` — commit
-  "Merge 5.10.270 into android12-5.10-lts" di repo source
-  `zylhdrXP/android_kernel_common-5.10` (Makefile-nya persis 5.10.270).
-- `build.sh` clone source, checkout commit itu, lalu **memeriksa**
-  `make kernelversion` harus `5.10.270` — kalau bukan, build berhenti.
-  Jadi tidak ada risiko versi diam-diam naik.
+1. Basis = branch utama zylhdrXP di commit `82ea4284` (5.10.269) — garis
+   keturunan semua kernel FleurX yang terbukti boot, lengkap dengan
+   patchset custom-nya (scheduler BORE, governor REFLEX/SCHEDHORIZON,
+   iosched ADIOS, dll).
+2. Dinaikkan ke 5.10.270 dengan `patches/stable-5.10.270.patch` — delta
+   resmi 5.10.269 → 5.10.270 dari jalur -lts Google (173 file).
+3. 8 file yang tambalannya bertabrakan dengan isi branch utama diganti
+   utuh dari folder `overlay-270/` — isinya persis resolusi gabungan
+   resmi Google (terverifikasi byte-for-byte sama dengan hasil merge
+   Google di branch utama).
 
-Catatan: branch `android12-5.10` sendiri tidak pernah berhenti di 5.10.270
-(dia melompat dari 5.10.269 ke 5.10.272), makanya yang dipakai commit
-penggabungan 5.10.270 di jalur LTS-nya.
+`build.sh` memeriksa hasil akhirnya: `make kernelversion` harus
+`5.10.270` dan penanda basis branch utama (`CONFIG_SCHED_BORE=y`) harus
+ada — kalau tidak, build berhenti.
 
 ## Cara pakai
 
