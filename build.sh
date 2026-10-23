@@ -41,31 +41,38 @@ fi
 export PATH="${CLANG_DIR}/bin:$PATH"
 COMPILER_STRING=$(clang --version | head -n 1 | sed 's/(https..*//' | sed 's/ version//')
 
-echo "-> Cloning Kernel Source (full clone, perlu commit lama)..."
+echo "-> Downloading Kernel Source (basis branch utama .269)..."
 if [ ! -d "$KSRC" ]; then
-    git clone -b "$KERNEL_BRANCH" "$KERNEL_SOURCE" "$KSRC"
+    mkdir -p "$KSRC"
+    curl -L --retry 3 -o "$WORKDIR/kernel-src.tar.gz" "$KERNEL_TARBALL_URL"
+    tar -xzf "$WORKDIR/kernel-src.tar.gz" -C "$KSRC" --strip-components=1
+    rm -f "$WORKDIR/kernel-src.tar.gz"
 fi
 
 cd "$KSRC"
-git checkout -f "$KERNEL_COMMIT"
+git init -q .
+
+# Naikkan basis .269 ke 5.10.270: tambalan resmi (delta jalur -lts Google)
+# + 8 file overlay yang resolusinya mengikuti gabungan resmi Google.
+git apply "$WORKDIR/patches/stable-5.10.270.patch"
+cp -a "$WORKDIR/overlay-270/." .
+
 LINUX_VERSION=$(make kernelversion)
-echo "-> Kernel source commit: $(git rev-parse HEAD)"
 echo "-> Kernel version: $LINUX_VERSION"
 if [ "$LINUX_VERSION" != "$KERNEL_VERSION" ]; then
     echo "Error: versi kernel $LINUX_VERSION, bukan $KERNEL_VERSION yang dipatok di config.sh!"
     exit 1
 fi
-k_lastcommit=$(git rev-parse --short HEAD)
+if ! grep -q "CONFIG_SCHED_BORE=y" arch/arm64/configs/gki_defconfig; then
+    echo "Error: penanda basis branch utama (SCHED_BORE) tidak ditemukan — basis source salah!"
+    exit 1
+fi
+k_lastcommit="${KERNEL_BASE_COMMIT:0:8}+patch270"
 
 mkdir -p "$ARTIFACT_DIR"
 
 echo "-> Building Variant: $VARIANT"
 cd "$KSRC"
-
-# Reset kernel source to clean state (tetap di commit yang dipatok)
-git checkout -f "$KERNEL_COMMIT"
-git checkout . -f
-git clean -fd
 
 rm -rf "$OUTDIR"
 mkdir -p "$OUTDIR"
@@ -206,7 +213,7 @@ Variant  : ${VARIANT}
 SuSFS    : ${SUSFS_VERSION}
 Compiler : ${COMPILER_STRING}
 Source   : ${KERNEL_SOURCE}
-Commit   : ${KERNEL_COMMIT} (${k_lastcommit})
+Commit   : ${k_lastcommit}
 File     : ${AK3_ZIP_NAME}
 SHA-256  : ${ZIP_SHA256}
 EOF
