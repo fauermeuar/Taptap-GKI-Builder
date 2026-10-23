@@ -1,0 +1,47 @@
+name: Build Taptap-GKI Kernel (5.10.270)
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: 'Kernel Variant'
+        required: true
+        type: choice
+        options:
+          - KSUN_SUSFS
+          - Vanilla
+          - ReSukiSU_SUSFS
+        default: 'KSUN_SUSFS'
+
+jobs:
+  build-kernel:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential bc bison flex git libssl-dev make zip zstd libelf-dev curl patch
+
+      - name: Allocate Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 10
+
+      - name: Run Builder Script
+        run: |
+          chmod +x build.sh
+          ./build.sh "${{ github.event.inputs.variant }}"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Taptap-GKI-5.10.270-${{ github.event.inputs.variant }}
+          path: artifacts/*
+          if-no-files-found: error
+          retention-days: 90
