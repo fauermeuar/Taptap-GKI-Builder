@@ -40,6 +40,13 @@ penggabungan 5.10.270 di jalur LTS-nya.
    `Taptap-GKI-1.0.0-5.10.270-<varian>.zip` (paket AnyKernel3,
    siap flash) + `build-info.txt` (berisi SHA-256 zip-nya).
 
+## Catatan build di GitHub Actions
+
+- Link kernel memakai **ThinLTO** (diatur otomatis di `build.sh`), bukan LTO
+  penuh — link LTO penuh kehabisan RAM di runner GitHub (proses mati
+  "Killed" di tahap `LTO vmlinux.o`). Swap workflow diset 16GB sebagai
+  cadangan.
+
 ## Peringatan
 
 - Zip hasil build adalah paket AnyKernel3 untuk kernel **GKI 5.10 arm64**
